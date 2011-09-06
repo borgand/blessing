@@ -8,5 +8,25 @@ require 'blessing'
 Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each {|f| require f}
 
 RSpec.configure do |config|
-  
+
+  def make_sample_config path
+    File.open path, "w" do |f|
+      basedir = File.dirname path
+      basename = File.basename path
+      base = basename.sub(/\..*?$/,'')
+
+      f.puts <<EOF
+worker_processes 4
+working_directory "#{basedir}"
+listen '#{basedir}/tmp/#{base}.sock', :backlog => 512
+timeout 30
+pid "#{basedir}/tmp/pids/#{base}_unicorn.pid"
+
+preload_app true
+  if GC.respond_to?(:copy_on_write_friendly=)
+  GC.copy_on_write_friendly = true
+end
+EOF
+    end
+  end
 end

@@ -1,6 +1,29 @@
 = blessing
 
-Description goes here.
+A group of Unicorns is called a blessing.
+
+Blessing is a script to manage multiple Unicorn Rack servers.
+
+== Install
+
+    gem install blessing
+
+== Run
+
+Blessing CLI script takes at least one argument, which provides a list of Unicorn configuration files and then
+starts Unicorn instances from them.
+
+    blessing /var/www/rails_app/config/unicorn.conf
+
+    blessing /var/www/*/config/unicorn.conf
+
+    blessing /var/vhosts/**/config/unicorn.conf
+
+After starting the servers, Blessing keeps monitoring the given list of configurations and reacts to the following events:
+
+* when a conf file is changed, restarts the corresponding Unicorn instance
+* when a new conf is found (via globbing), starts a new instance
+* when a conf is removed, stops the corresponding instance
 
 == Contributing to blessing
  
