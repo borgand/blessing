@@ -119,7 +119,7 @@ describe Blessing::Leader do
 
     it "asks Runners to check if reload is necessary" do
       mock_runner = double(Blessing::Runner)
-      mock_runner.should_receive(:check_reload!)
+      mock_runner.should_receive(:check_reload)
 
       leader = Blessing::Leader.new("")
       conf = "#{@tmpdir}/unicorn.conf"

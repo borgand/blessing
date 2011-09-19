@@ -20,7 +20,7 @@ worker_processes 4
 working_directory "#{basedir}"
 listen '#{basedir}/tmp/#{base}.sock', :backlog => 512
 timeout 30
-pid "#{basedir}/tmp/pids/#{base}_unicorn.pid"
+pid "#{basedir}/tmp/pids/unicorn.pid"
 
 preload_app true
   if GC.respond_to?(:copy_on_write_friendly=)

@@ -15,13 +15,34 @@ describe Blessing::Runner do
       FileUtils.rm_rf @tmpdir
     end
 
-    it "parses all conf files for pids" do
-      pending "Get Unicorn conf parser working"
-      leader = Blessing::Leader.new(@conf)
-      pids = ["#{@conf.sub(/\..*?$/,'')}.pid"]
-      leader.pids.should == pids
+    it "takes config file as argument to new" do
+      runner = Blessing::Runner.new(@conf)
+      runner.config_file.should == @conf
     end
 
+
+
+    it "parses conf files for pid file and working_directory location" do
+      runner = Blessing::Runner.new(@conf)
+      pid = File.join(File.dirname(@conf), "/tmp/pids/unicorn.pid")
+      runner.conf[:pid].should == pid
+    end
+
+    it "starts Unicorn process"
+
+    it "collects all PIDs"
+
+    it "stops Unicorn process"
+
+    it "reloads Unicorn process"
+
+    it "checks if Unicorn process is running"
+
+    it "starts stopped Unicorn process"
+
+    it "retries Unicorn restart only X times"
+
+    it "reloads Unicorn if conf file has changed"
 
   end
 end

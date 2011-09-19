@@ -18,17 +18,6 @@ module Blessing
       @options = DefaultOptions.merge(opts)
     end
 
-
-    # Main cycle
-    # - refresh file list
-    # - start/stop runners
-    # - verify/reload runners
-    def run_cycle
-      refresh_file_list
-      start_stop_runners
-      reload_runners
-    end
-
     # Start running cycles
     def start
       @run_cycles = true
@@ -42,6 +31,16 @@ module Blessing
     # Stop running cycles
     def stop
       @run_cycles = false
+    end
+
+    # Main cycle
+    # - refresh file list
+    # - start/stop runners
+    # - verify/reload runners
+    def run_cycle
+      refresh_file_list
+      start_stop_runners
+      reload_runners
     end
 
     # Refresh config file list and preserve old list
@@ -80,7 +79,7 @@ module Blessing
     # Let each runner check itself if reload is needed
     def reload_runners
       @runners.each_value do |runner|
-        runner.check_reload!
+        runner.check_reload
       end
     end
 
