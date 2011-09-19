@@ -17,8 +17,8 @@ Jeweler::Tasks.new do |gem|
   gem.name = "blessing"
   gem.homepage = "http://github.com/borgand/blessing"
   gem.license = "MIT"
-  gem.summary = %Q{Manage a group of Unicorn Rack servers.}
-  gem.description = %Q{A group of Unicorns is called a blessing. Blessing gem provides an easy way to manage multiple Unicorn Rack servers.}
+  gem.summary = %Q{Manage a group of Unicorn! Rack servers.}
+  gem.description = %Q{A group of Unicorns is called a blessing. Blessing gem provides an easy way to manage multiple Unicorn! Rack servers.}
   gem.email = "laas.toom@gmail.com"
   gem.authors = ["Laas Toom"]
   # dependencies defined in Gemfile
