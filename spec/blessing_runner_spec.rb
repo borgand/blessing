@@ -7,8 +7,7 @@ describe Blessing::Runner do
   context "Read configuration" do
     before(:all) do
       @tmpdir = Dir.mktmpdir('blessing_test')
-      @conf = File.join(@tmpdir,"unicorn.conf")
-      make_sample_config(@conf)
+      @conf = make_sample_config(@tmpdir)
     end
 
     after(:all) do
@@ -25,14 +24,22 @@ describe Blessing::Runner do
     it "parses conf files for pid file and working_directory location" do
       runner = Blessing::Runner.new(@conf)
       pid = File.join(File.dirname(@conf), "/tmp/pids/unicorn.pid")
-      runner.conf[:pid].should == pid
+      runner.opts[:pid].should == pid
     end
 
-    it "starts Unicorn process"
+    it "starts and stops Unicorn process" do
+      runner = Blessing::Runner.new(@conf)
+      runner.start
+      runner.opts[:pid].should contain_a_pid_number
+      runner.opts[:pid].should point_to_running_process
 
-    it "collects all PIDs"
+      runner.stop
+      # give it time to die
+      sleep 1
 
-    it "stops Unicorn process"
+      runner.opts[:pid].should_not point_to_running_process
+      runner.opts[:pid].should_not contain_a_pid_number
+    end
 
     it "reloads Unicorn process"
 
