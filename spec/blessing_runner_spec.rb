@@ -41,7 +41,14 @@ describe Blessing::Runner do
       runner.opts[:pid].should_not contain_a_pid_number
     end
 
-    it "reloads Unicorn process"
+    it "reloads Unicorn process" do
+      runner = Blessing::Runner.new(@conf)
+
+      runner.should_receive(:pid).and_return(12345)
+      Process.should_receive(:kill).once
+      runner.reload
+
+    end
 
     it "checks if Unicorn process is running"
 

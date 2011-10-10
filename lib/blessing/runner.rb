@@ -47,15 +47,29 @@ module Blessing
     # Stops the actual Unicorn! process
     def stop
       if File.exists? opts[:pid]
-        pid = File.read(opts[:pid]).chomp.to_i
-
         # Lets not panic if the process is already dead
         begin
           Process.kill "QUIT", pid
-        rescue
+        rescue => e
           # TODO: instead log this as unexpected
         end
       end
     end
+
+    # Reload Unicorn! master process
+    def reload
+      begin
+        Process.kill "HUP", pid
+      rescue => e
+        # TODO: log unexpected error
+      end
+    end
+
+    private
+    # Read PID from pid-file
+    def pid
+      File.read(opts[:pid]).chomp.to_i
+    end
+
   end
 end
