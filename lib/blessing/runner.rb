@@ -65,6 +65,17 @@ module Blessing
       end
     end
 
+    # Verify the Unicorn! process is running
+    def verify_running
+      begin
+        Process.kill 0, pid
+        true
+      rescue Errno::ESRCH
+        # just verifying; logging should be done elsewhere
+        false
+      end
+    end
+
     private
     # Read PID from pid-file
     def pid

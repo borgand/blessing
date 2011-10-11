@@ -50,7 +50,19 @@ describe Blessing::Runner do
 
     end
 
-    it "checks if Unicorn process is running"
+    it "checks if Unicorn process is running" do
+      runner = Blessing::Runner.new(@conf)
+
+      pid = 12345
+      runner.should_receive(:pid).and_return(pid)
+      Process.should_receive(:kill).with(0, pid).and_return(true)
+      runner.verify_running.should be_true
+
+      pid = 22345
+      runner.should_receive(:pid).and_return(pid)
+      Process.should_receive(:kill).with(0, pid) { raise Errno::ESRCH, "TestException" }
+      runner.verify_running.should_not be_true
+    end
 
     it "starts stopped Unicorn process"
 
