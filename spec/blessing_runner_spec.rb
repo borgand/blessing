@@ -50,25 +50,47 @@ describe Blessing::Runner do
 
     end
 
-    it "checks if Unicorn process is running" do
+    it "verifies that Unicorn process is running" do
       runner = Blessing::Runner.new(@conf)
 
       pid = 12345
       runner.should_receive(:pid).and_return(pid)
       Process.should_receive(:kill).with(0, pid).and_return(true)
-      runner.verify_running.should be_true
+      runner.running?.should be_true
 
       pid = 22345
       runner.should_receive(:pid).and_return(pid)
       Process.should_receive(:kill).with(0, pid) { raise Errno::ESRCH, "TestException" }
-      runner.verify_running.should_not be_true
+      runner.running?.should_not be_true
     end
 
-    it "starts stopped Unicorn process"
+    it "restarts stopped Unicorn process" do
+      runner = Blessing::Runner.new(@conf)
 
-    it "retries Unicorn restart only X times"
+      runner.opts[:retry_delay] = 0
+      runner.should_receive(:running?).exactly(:once).and_return(false)
+      runner.should_receive(:running?).once.and_return(true)
+      runner.should_receive(:start)
+
+      runner.ensure_running.should be_true
+    end
+
+    it "stops trying to restart if too many failures" do
+      runner = Blessing::Runner.new(@conf)
+
+      max_tries = 3
+      runner.opts[:max_restarts] = max_tries
+      runner.opts[:retry_delay] = 0
+
+      runner.should_receive(:running?).exactly(max_tries + 1).times.and_return(false)
+      runner.should_receive(:start).exactly(max_tries).times
+
+      runner.ensure_running.should_not be_true
+    end
 
     it "reloads Unicorn if conf file has changed"
+
+    it "checks if reload or restart is necessary"
 
   end
 end

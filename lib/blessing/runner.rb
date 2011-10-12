@@ -9,7 +9,9 @@ module Blessing
     attr_reader :config_file, :opts
 
     DEFAULT_OPTS={
-      :unicorn => `which unicorn`,
+      :unicorn => `which unicorn`,  # Where is unicorn binary
+      :max_restarts => 5,           # How many times to retry restarting
+      :retry_delay => 1,            # How long (secs) sleep between retries
     }
 
     def initialize conf, opts = {}
@@ -66,7 +68,7 @@ module Blessing
     end
 
     # Verify the Unicorn! process is running
-    def verify_running
+    def running?
       begin
         Process.kill 0, pid
         true
@@ -74,6 +76,19 @@ module Blessing
         # just verifying; logging should be done elsewhere
         false
       end
+    end
+
+    # Ensure the Unicorn! process is running
+    # restarting it if needed
+    def ensure_running
+      unless success = running?
+        opts[:max_restarts].times do
+          start
+          sleep opts[:retry_delay]
+          break if success = running?
+        end
+      end
+      success
     end
 
     private
