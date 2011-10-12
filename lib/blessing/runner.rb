@@ -43,7 +43,6 @@ module Blessing
       @config_timestamp != config_modification_time
     end
 
-
     # Starts the actual Unicorn! process
     def start
       fork do
@@ -67,6 +66,20 @@ module Blessing
           # TODO: instead log this as unexpected
         end
       end
+    end
+
+    # Reload Unicorn if needed
+    # Ensure it did start up
+    # (This is the main cycle of Leader control)
+    def check_reload
+      # If configuration has changed, reload Unicorn
+      if config_modified?
+        reload
+      end
+
+      # In any case ensure it is running
+      ensure_running
+
     end
 
     # Reload Unicorn! master process

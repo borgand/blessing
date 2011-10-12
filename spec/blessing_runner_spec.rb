@@ -97,7 +97,17 @@ describe Blessing::Runner do
       runner.config_modified?.should be_true
     end
 
-    it "checks if reload or restart is necessary"
+    context "main monitoring cycle" do 
 
+      it "reloads if needed and ensures Unicorn is running" do
+        runner = Blessing::Runner.new(@conf)
+        runner.should_receive(:config_modified?).and_return(true)
+        runner.should_receive(:reload)
+        runner.should_receive(:ensure_running)
+
+        runner.check_reload
+      end
+
+    end
   end
 end
