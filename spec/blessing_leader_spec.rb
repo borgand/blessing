@@ -18,7 +18,13 @@ describe Blessing::Leader do
     it "Takes shell glob pattern and preserves it" do
       pattern = "/tmp/**/*.conf"
       leader = Blessing::Leader.new pattern
-      leader.pattern.should == pattern
+      leader.patterns.should == [pattern]
+    end
+
+    it "takes multiple patterns" do
+      patterns = %w(/tmp/**/1.conf /tmp/**/2.conf)
+      leader = Blessing::Leader.new patterns
+      leader.patterns.should == patterns
     end
 
   end
@@ -33,7 +39,18 @@ describe Blessing::Leader do
       end
       leader = Blessing::Leader.new("#{@tmpdir}/**/unicorn_*.conf")
       leader.refresh_file_list
-      leader.config_files.should == files
+      leader.config_files.should == files.sort
+    end
+
+    it "finds a unique list of files corresponding to multiple patterns" do
+      files = []
+      3.times do |i|
+        files << name = File.join(@tmpdir,"unicorn_#{i}.conf")
+        FileUtils.touch name
+      end
+      leader = Blessing::Leader.new(%W(#{@tmpdir}/**/unicorn_1.conf #{@tmpdir}/**/unicorn_*.conf))
+      leader.refresh_file_list
+      leader.config_files.should == files.sort
     end
 
 

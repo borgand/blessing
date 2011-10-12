@@ -8,11 +8,11 @@ module Blessing
       :refresh => 10,
     }
 
-    attr_accessor :pattern, :config_files, :old_config_files, :runners
+    attr_accessor :patterns, :config_files, :old_config_files, :runners
 
     # Initialize new Blessing::Leader with file list pattern
-    def initialize pattern, opts = {}
-      @pattern = pattern
+    def initialize patterns, opts = {}
+      @patterns = patterns.is_a?(Array) ? patterns : [patterns]
       @old_confdig_files = @config_files = []
       @runners = {}
       @options = DefaultOptions.merge(opts)
@@ -48,7 +48,10 @@ module Blessing
     def refresh_file_list
       # Preserve old file list
       @old_config_files = @config_files
-      @config_files = Dir.glob @pattern
+
+      files = []
+      @patterns.each{|p| files += Dir.glob(p)}
+      @config_files = files.uniq.sort
     end
 
     # Find differences in old and new config file lists
