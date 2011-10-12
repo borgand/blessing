@@ -88,7 +88,14 @@ describe Blessing::Runner do
       runner.ensure_running.should_not be_true
     end
 
-    it "reloads Unicorn if conf file has changed"
+    it "detects that configuration file has been modified" do
+      runner = Blessing::Runner.new(@conf)
+
+      runner.config_modified?.should_not be_true
+      sleep 1
+      FileUtils.touch @conf
+      runner.config_modified?.should be_true
+    end
 
     it "checks if reload or restart is necessary"
 

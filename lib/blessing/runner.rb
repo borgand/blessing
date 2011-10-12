@@ -20,8 +20,14 @@ module Blessing
       parse_configuration
     end
 
+    # Gets the modification time of the configuration file
+    def config_modification_time
+      File.stat(@config_file).ctime
+    end
+
     # Let Unicorn parse it's config file
     def parse_configuration
+      @config_timestamp = config_modification_time
       conf_str = File.read @config_file
 
       # Parse parameters we are interested in
@@ -30,6 +36,11 @@ module Blessing
           @opts[key] = eval $1
         end
       end
+    end
+
+    # Detect if the configuration has been modified
+    def config_modified?
+      @config_timestamp != config_modification_time
     end
 
 
