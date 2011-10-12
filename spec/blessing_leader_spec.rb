@@ -153,6 +153,12 @@ describe Blessing::Leader do
 
     end
 
+    it "stops all runners when stopped" do
+      leader = Blessing::Leader.new ""
+      leader.should_receive(:stop_runners)
+      leader.stop
+    end
+
   end
 end
 

@@ -31,6 +31,7 @@ module Blessing
     # Stop running cycles
     def stop
       @run_cycles = false
+      stop_runners @config_files
     end
 
     # Main cycle
