@@ -4,8 +4,11 @@ module Blessing
   class Leader
 
     DefaultOptions = {
+      # Run as daemon
+      :daemonize => true,
       # Monitoring refresh cycle legth in seconds
       :refresh => 10,
+      :verbose => false,
     }
 
     attr_accessor :patterns, :config_files, :old_config_files, :runners
@@ -18,8 +21,13 @@ module Blessing
       @options = DefaultOptions.merge(opts)
     end
 
+    def daemonize!
+      Daemons.daemonize
+    end
+
     # Start running cycles
     def start
+      daemonize! if opts[:daemonize]
       @run_cycles = true
       while true do
         break unless @run_cycles

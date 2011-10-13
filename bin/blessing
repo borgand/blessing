@@ -1,0 +1,48 @@
+#!/usr/bin/env ruby
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
+
+require 'blessing'
+require 'optparse'
+
+opts = Blessing::Leader::DefaultOptions
+
+optparse = OptionParser.new do |o|
+  o.banner = "USAGE #{File.basename $0} [options] pattern [pattern2 ...]"
+
+  o.separator ""
+
+  o.separator <<-EOF
+  Blessing takes multiple patterns as its command line arguments,
+  globs them and starts Unicorn! servers on all matching configurations.
+
+  Then it periodically refreshes this list and starts new servers
+  for added files and kills of redundant processes for missing files.
+  EOF
+
+  o.separator ""
+
+  o.on("-d", "--[no-]daemon", "Run as daemon. Default: #{opts[:daemonize]}"){|v| opts[:daemonize] = v}
+  o.on("-r SECS", "--refresh SECS", Integer, "Set the cycle length in seconds. Default: #{opts[:refresh]}"){|v| opts[:refresh] = v}
+  o.on("-v", "--[no-]verbose", "Run verbosely. Default: #{opts[:verbose]}"){|v| opts[:verbose] = v}
+
+  o.separator ""
+
+  o.on_tail("-h", "--help", "Show this message") do
+    puts o
+    exit
+  end
+
+  o.on_tail("--version", "Show version") do
+    puts Blessing.version
+    exit
+  end
+end
+
+optparse.parse!
+
+if ARGV.size == 0
+  puts "ERROR: Missing argument - at least one configuration file required"
+  exit 1
+end
+
+leader = Blessing::Leader.new ARGV, opts
