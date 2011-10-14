@@ -176,6 +176,31 @@ describe Blessing::Leader do
       leader.stop
     end
 
+    it "daemonizes when asked" do
+      leader = Blessing::Leader.new "", :daemonize => true, :refresh => 0
+
+      Daemons.should_receive(:daemonize)
+
+      count = 1
+      leader.stub(:run_cycle) do
+        leader.stop if count <= 0
+        count -= 1
+      end
+      leader.should_receive(:run_cycle).twice
+      leader.start
+
+    end
+  end
+
+  context "Logging" do
+    it "creates logger facility" do
+      leader = Blessing::Leader.new ""
+      leader.logger.should respond_to :debug
+      leader.logger.should respond_to :info
+      leader.logger.should respond_to :warn
+      leader.logger.should respond_to :error
+      leader.logger.should respond_to :fatal
+    end
   end
 end
 

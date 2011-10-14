@@ -1,3 +1,6 @@
+require 'logger'
+require 'daemons'
+
 module Blessing
 
   # Blessing::Leader is the main class and entry point
@@ -5,20 +8,29 @@ module Blessing
 
     DefaultOptions = {
       # Run as daemon
-      :daemonize => true,
+      :daemonize => false,
       # Monitoring refresh cycle legth in seconds
       :refresh => 10,
       :verbose => false,
+      :log => STDOUT,
+      :log_level => Logger::INFO,
     }
 
-    attr_accessor :patterns, :config_files, :old_config_files, :runners
+    attr_accessor :patterns, :config_files, :old_config_files, :runners, :logger
 
     # Initialize new Blessing::Leader with file list pattern
     def initialize patterns, opts = {}
+      @options = DefaultOptions.merge(opts)
+      initialize_logger
+
       @patterns = patterns.is_a?(Array) ? patterns : [patterns]
       @old_confdig_files = @config_files = []
       @runners = {}
-      @options = DefaultOptions.merge(opts)
+    end
+
+    def initialize_logger
+      @logger = Logger.new @options[:log]
+      @logger.level = @options[:log_level]
     end
 
     def daemonize!
@@ -27,10 +39,9 @@ module Blessing
 
     # Start running cycles
     def start
-      daemonize! if opts[:daemonize]
+      daemonize! if @options[:daemonize]
       @run_cycles = true
-      while true do
-        break unless @run_cycles
+      while @run_cycles do
         run_cycle
         sleep @options[:refresh]
       end
