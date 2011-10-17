@@ -94,7 +94,7 @@ module Blessing
     def start_runners(files)
       logger.debug "Starting runners for: #{files.inspect}"
       files.each { |conf|
-        @runners[conf] = runner = Blessing::Runner.new(conf)
+        @runners[conf] = runner = Blessing::Runner.new(conf, :leader => self)
         runner.start
       }
     end

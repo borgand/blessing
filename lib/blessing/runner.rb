@@ -1,4 +1,5 @@
 require 'unicorn/launcher'
+require 'logger'
 
 module Blessing
 
@@ -15,9 +16,24 @@ module Blessing
     }
 
     def initialize conf, opts = {}
+      @leader = opts.delete(:leader)
       @config_file = conf
+      logger.info "Initializing Blessing::Runner for #{conf}"
       @opts = DEFAULT_OPTS.merge opts
       parse_configuration
+    end
+
+    # Tap on leader logger facility or create one
+    def logger
+      if @leader
+        @leader.logger
+      else
+        # We don't have leader connected, wont clutter stdout with log
+        unless @logger
+          @logger = Logger.new '/dev/null'
+        end
+        @logger
+      end
     end
 
     # Gets the modification time of the configuration file
@@ -45,6 +61,7 @@ module Blessing
 
     # Starts the actual Unicorn! process
     def start
+      logger.info "Starting Unicorn! process for #{@config_file.inspect}"
       fork do
         # Options to Unicorn! process
         options ={:config_file => @config_file}
@@ -58,13 +75,12 @@ module Blessing
 
     # Stops the actual Unicorn! process
     def stop
-      if File.exists? opts[:pid]
-        # Lets not panic if the process is already dead
-        begin
-          Process.kill "QUIT", pid
-        rescue => e
-          # TODO: instead log this as unexpected
-        end
+      logger.info "Stopping Unicorn! process for #{@config_file.inspect}"
+      # Lets not panic if the process is already dead
+      begin
+        Process.kill "QUIT", pid
+      rescue => e
+        logger.warn "Process does not exist! PID=#{pid}, conf=#{@config_file.inspect}"
       end
     end
 
@@ -72,6 +88,7 @@ module Blessing
     # Ensure it did start up
     # (This is the main cycle of Leader control)
     def check_reload
+      logger.debug "Verifying #{@config_file.inspect}"
       # If configuration has changed, reload Unicorn
       if config_modified?
         reload
@@ -84,6 +101,7 @@ module Blessing
 
     # Reload Unicorn! master process
     def reload
+      logger.info "Reloading #{@config_file.inspect}"
       begin
         Process.kill "HUP", pid
       rescue => e
@@ -106,11 +124,18 @@ module Blessing
     # restarting it if needed
     def ensure_running
       unless success = running?
-        opts[:max_restarts].times do
+        logger.info "Process is not running: pid=#{pid} conf=#{@config_file.inspect}"
+        opts[:max_restarts].times do |i|
+          logger.info "Restarting: try=#{i+1}"
           start
           sleep opts[:retry_delay]
           break if success = running?
         end
+      end
+      if success
+        logger.info "Successfully restarted"
+      else
+        logger.warn "Failed to restart in #{opts[:max_restarts]} tries, conf=#{@config_file.inspect}"
       end
       success
     end
@@ -118,7 +143,12 @@ module Blessing
     private
     # Read PID from pid-file
     def pid
-      File.read(opts[:pid]).chomp.to_i
+      if File.exists? opts[:pid]
+        File.read(opts[:pid]).chomp.to_i
+      else
+        logger.warn "PID-file does not exist! Pidfile= #{@opts[:pid].inspect}, conf=#{@config_file.inspect}"
+        nil
+      end
     end
 
   end

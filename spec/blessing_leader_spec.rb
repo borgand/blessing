@@ -17,13 +17,13 @@ describe Blessing::Leader do
 
     it "Takes shell glob pattern and preserves it" do
       pattern = "/tmp/**/*.conf"
-      leader = Blessing::Leader.new pattern
+      leader = Blessing::Leader.new pattern, :log => '/dev/null'
       leader.patterns.should == [pattern]
     end
 
     it "takes multiple patterns" do
       patterns = %w(/tmp/**/1.conf /tmp/**/2.conf)
-      leader = Blessing::Leader.new patterns
+      leader = Blessing::Leader.new patterns, :log => '/dev/null', :log => '/dev/null'
       leader.patterns.should == patterns
     end
 
@@ -37,7 +37,7 @@ describe Blessing::Leader do
         files << name = File.join(@tmpdir,"unicorn_#{i}.conf")
         FileUtils.touch name
       end
-      leader = Blessing::Leader.new("#{@tmpdir}/**/unicorn_*.conf")
+      leader = Blessing::Leader.new("#{@tmpdir}/**/unicorn_*.conf", :log => '/dev/null')
       leader.refresh_file_list
       leader.config_files.should == files.sort
     end
@@ -48,7 +48,7 @@ describe Blessing::Leader do
         files << name = File.join(@tmpdir,"unicorn_#{i}.conf")
         FileUtils.touch name
       end
-      leader = Blessing::Leader.new(%W(#{@tmpdir}/**/unicorn_1.conf #{@tmpdir}/**/unicorn_*.conf))
+      leader = Blessing::Leader.new(%W(#{@tmpdir}/**/unicorn_1.conf #{@tmpdir}/**/unicorn_*.conf), :log => '/dev/null')
       leader.refresh_file_list
       leader.config_files.should == files.sort
     end
@@ -60,7 +60,7 @@ describe Blessing::Leader do
         old_files << name = File.join(@tmpdir,"unicorn_#{i}.conf")
         FileUtils.touch name
       end
-      leader = Blessing::Leader.new("#{@tmpdir}/**/unicorn_*.conf")
+      leader = Blessing::Leader.new("#{@tmpdir}/**/unicorn_*.conf", :log => '/dev/null')
       leader.refresh_file_list
 
       # Remove one file and add one file
@@ -81,7 +81,7 @@ describe Blessing::Leader do
       config_files = (2..3).map{|i| File.join(@tmpdir,"unicorn_#{i}.conf")}
       runner_mock = double(Blessing::Runner)
 
-      leader = Blessing::Leader.new "#{@tmpdir}/**/unicorn_*.conf"
+      leader = Blessing::Leader.new "#{@tmpdir}/**/unicorn_*.conf", :log => '/dev/null'
       leader.old_config_files = old_config_files
       leader.config_files = config_files
 
@@ -98,7 +98,7 @@ describe Blessing::Leader do
       mock_runner.should_not_receive(:start)
       mock_runner.should_not_receive(:stop)
 
-      leader = Blessing::Leader.new ""
+      leader = Blessing::Leader.new "", :log => '/dev/null'
       leader.config_files = leader.old_config_files = [conf]
       leader.runners[conf] = mock_runner
 
@@ -116,7 +116,7 @@ describe Blessing::Leader do
       mock_runner.should_receive(:start)
       Blessing::Runner.should_receive(:new).and_return(mock_runner)
 
-      leader = Blessing::Leader.new("")
+      leader = Blessing::Leader.new("", :log => '/dev/null')
 
       leader.start_runners(["#{@tmpdir}/unicorn_conf"])
     end
@@ -126,7 +126,7 @@ describe Blessing::Leader do
       mock_runner.should_receive(:stop)
       conf = "#{@tmpdir}/unicorn_conf"
 
-      leader = Blessing::Leader.new("")
+      leader = Blessing::Leader.new("", :log => '/dev/null')
       leader.runners[conf] = mock_runner
       
       leader.stop_runners([conf])
@@ -138,7 +138,7 @@ describe Blessing::Leader do
       mock_runner = double(Blessing::Runner)
       mock_runner.should_receive(:check_reload)
 
-      leader = Blessing::Leader.new("")
+      leader = Blessing::Leader.new("", :log => '/dev/null')
       conf = "#{@tmpdir}/unicorn.conf"
       leader.config_files = [conf]
       leader.runners[conf] = mock_runner
@@ -150,7 +150,7 @@ describe Blessing::Leader do
 
   context "Main API" do
     it "does refresh-start-stop-reload cycle" do
-      leader = Blessing::Leader.new("")
+      leader = Blessing::Leader.new("", :log => '/dev/null')
       leader.should_receive(:refresh_file_list)
       leader.should_receive(:start_stop_runners)
       leader.should_receive(:reload_runners)
@@ -159,7 +159,7 @@ describe Blessing::Leader do
     end
 
     it "when started, runs cycle every X seconds, until stopped" do
-      leader = Blessing::Leader.new "", :refresh => 1
+      leader = Blessing::Leader.new "", :refresh => 1, :log => '/dev/null'
       count = 1
       leader.stub(:run_cycle) do
         leader.stop if count <= 0
@@ -171,13 +171,13 @@ describe Blessing::Leader do
     end
 
     it "stops all runners when stopped" do
-      leader = Blessing::Leader.new ""
+      leader = Blessing::Leader.new "", :log => '/dev/null'
       leader.should_receive(:stop_runners)
       leader.stop
     end
 
     it "daemonizes when asked" do
-      leader = Blessing::Leader.new "", :daemonize => true, :refresh => 0
+      leader = Blessing::Leader.new "", :daemonize => true, :refresh => 0, :log => '/dev/null'
 
       Daemons.should_receive(:daemonize)
 
@@ -194,7 +194,7 @@ describe Blessing::Leader do
 
   context "Logging" do
     it "creates logger facility" do
-      leader = Blessing::Leader.new ""
+      leader = Blessing::Leader.new "", :log => '/dev/null'
       leader.logger.should respond_to :debug
       leader.logger.should respond_to :info
       leader.logger.should respond_to :warn

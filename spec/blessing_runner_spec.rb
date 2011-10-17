@@ -4,15 +4,16 @@ require 'tmpdir'
 require 'fileutils'
 
 describe Blessing::Runner do
-  context "Read configuration" do
-    before(:all) do
-      @tmpdir = Dir.mktmpdir('blessing_test')
-      @conf = make_sample_config(@tmpdir)
-    end
+  before(:all) do
+    @tmpdir = Dir.mktmpdir('blessing_test')
+    @conf = make_sample_config(@tmpdir)
+  end
 
-    after(:all) do
-      FileUtils.rm_rf @tmpdir
-    end
+  after(:all) do
+    FileUtils.rm_rf @tmpdir
+  end
+
+  context "Read configuration" do
 
     it "takes config file as argument to new" do
       runner = Blessing::Runner.new(@conf)
@@ -96,18 +97,42 @@ describe Blessing::Runner do
       FileUtils.touch @conf
       runner.config_modified?.should be_true
     end
+  end
 
-    context "main monitoring cycle" do 
+  context "main monitoring cycle" do 
 
-      it "reloads if needed and ensures Unicorn is running" do
-        runner = Blessing::Runner.new(@conf)
-        runner.should_receive(:config_modified?).and_return(true)
-        runner.should_receive(:reload)
-        runner.should_receive(:ensure_running)
+    it "reloads if needed and ensures Unicorn is running" do
+      runner = Blessing::Runner.new(@conf)
+      runner.should_receive(:config_modified?).and_return(true)
+      runner.should_receive(:reload)
+      runner.should_receive(:ensure_running)
 
-        runner.check_reload
-      end
+      runner.check_reload
+    end
 
+  end
+
+  context "logging" do
+    it "connects to leader logger" do
+      logger = double
+      logger.stub(:debug)
+      logger.stub(:notice)
+      logger.stub(:info)
+      logger.stub(:warn)
+      logger.stub(:error)
+      logger.stub(:fatal)
+
+      leader = double(Blessing::Leader)
+      leader.stub(:logger){logger}
+
+
+      runner = Blessing::Runner.new(@conf, :leader => leader)
+      runner.logger.should respond_to :debug
+    end
+
+    it "creates logger if leader not connected" do
+      runner = Blessing::Runner.new @conf
+      runner.logger.should respond_to :debug
     end
   end
 end
