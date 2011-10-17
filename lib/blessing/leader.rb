@@ -13,7 +13,6 @@ module Blessing
       :refresh => 10,
       :verbose => false,
       :log => STDOUT,
-      :log_level => Logger::INFO,
     }
 
     attr_accessor :patterns, :config_files, :old_config_files, :runners, :logger
@@ -30,10 +29,11 @@ module Blessing
 
     def initialize_logger
       @logger = Logger.new @options[:log]
-      @logger.level = @options[:log_level]
+      @logger.level = @options[:verbose] ? Logger::DEBUG : Logger::INFO
     end
 
     def daemonize!
+      logger.debug
       Daemons.daemonize
     end
 

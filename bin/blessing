@@ -22,6 +22,7 @@ optparse = OptionParser.new do |o|
   o.separator ""
 
   o.on("-d", "--[no-]daemon", "Run as daemon. Default: #{opts[:daemonize]}"){|v| opts[:daemonize] = v}
+  o.on("-l FILE", "--log FILE", "Start logging to FILE. Default: STDOUT"){|v| opts[:log] = v}
   o.on("-r SECS", "--refresh SECS", Integer, "Set the cycle length in seconds. Default: #{opts[:refresh]}"){|v| opts[:refresh] = v}
   o.on("-v", "--[no-]verbose", "Run verbosely. Default: #{opts[:verbose]}"){|v| opts[:verbose] = v}
 
