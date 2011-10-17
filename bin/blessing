@@ -47,3 +47,5 @@ if ARGV.size == 0
 end
 
 leader = Blessing::Leader.new ARGV, opts
+
+leader.start
