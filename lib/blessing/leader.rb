@@ -28,6 +28,16 @@ module Blessing
 
       @old_confdig_files = @config_files = []
       @runners = {}
+
+      # Trap some signals
+      trap("INT"){
+        logger.info "Caught SIGINT"
+        at_exit
+      }
+      trap("TERM"){
+        logger.info "Caught SIGTERM"
+        at_exit
+      }
     end
 
     def initialize_logger
@@ -38,6 +48,12 @@ module Blessing
     def daemonize!
       logger.info "Daemonizing..."
       Daemons.daemonize
+    end
+
+    # Daemons hook to shut down properly
+    def at_exit
+      logger.info "Shutting down"
+      stop
     end
 
     # Start running cycles
