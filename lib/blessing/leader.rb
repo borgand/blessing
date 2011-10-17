@@ -92,7 +92,7 @@ module Blessing
 
     # Start runners for added config files
     def start_runners(files)
-      logger.debug "Starting runners for: #{files.inspect}"
+      logger.debug "Starting runners for: #{files.inspect}" unless files.empty?
       files.each { |conf|
         @runners[conf] = runner = Blessing::Runner.new(conf, :leader => self)
         runner.start
@@ -101,7 +101,7 @@ module Blessing
 
     # Stop runners for missing config files
     def stop_runners(files)
-      logger.debug "Stopping runners for: #{files.inspect}"
+      logger.debug "Stopping runners for: #{files.inspect}" unless files.empty?
       files.each { |conf| 
         if @runners[conf]
           @runners[conf].stop

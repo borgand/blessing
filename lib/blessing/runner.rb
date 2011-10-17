@@ -131,11 +131,11 @@ module Blessing
           sleep opts[:retry_delay]
           break if success = running?
         end
-      end
-      if success
-        logger.info "Successfully restarted"
-      else
-        logger.warn "Failed to restart in #{opts[:max_restarts]} tries, conf=#{@config_file.inspect}"
+        if success
+          logger.info "Successfully restarted"
+        else
+          logger.warn "Failed to restart in #{opts[:max_restarts]} tries, conf=#{@config_file.inspect}"
+        end
       end
       success
     end
