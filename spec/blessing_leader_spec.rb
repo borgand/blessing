@@ -176,20 +176,6 @@ describe Blessing::Leader do
       leader.stop
     end
 
-    it "daemonizes when asked" do
-      leader = Blessing::Leader.new "", :daemonize => true, :refresh => 0, :log => '/dev/null'
-
-      Daemons.should_receive(:daemonize)
-
-      count = 1
-      leader.stub(:run_cycle) do
-        leader.stop if count <= 0
-        count -= 1
-      end
-      leader.should_receive(:run_cycle).twice
-      leader.start
-
-    end
   end
 
   context "Logging" do
