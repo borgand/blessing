@@ -1,5 +1,4 @@
 require 'logger'
-require 'daemons'
 
 module Blessing
 
@@ -20,6 +19,8 @@ module Blessing
     # Initialize new Blessing::Leader with file list pattern
     def initialize patterns, opts = {}
       @options = DefaultOptions.merge(opts)
+      #daemonize! if @options[:daemonize]
+
       initialize_logger
 
       logger.info "Starting Blessing::Leader"
@@ -38,16 +39,17 @@ module Blessing
         logger.info "Caught SIGTERM"
         at_exit
       }
+      trap("USR1"){
+        # TODO: instant recycle
+      }
+      trap("USR2"){
+        # TODO: resurrect dead Unicorns!
+      }
     end
 
     def initialize_logger
       @logger = Logger.new @options[:log]
       @logger.level = @options[:verbose] ? Logger::DEBUG : Logger::INFO
-    end
-
-    def daemonize!
-      logger.info "Daemonizing..."
-      Daemons.daemonize
     end
 
     # Daemons hook to shut down properly
@@ -59,7 +61,6 @@ module Blessing
     # Start running cycles
     def start
       logger.info "Starting cycles"
-      daemonize! if @options[:daemonize]
       @run_cycles = true
       while @run_cycles do
         run_cycle
@@ -72,7 +73,7 @@ module Blessing
       @run_cycles = false
       logger.debug "Stopping all runners..."
       stop_runners @config_files
-      logger.info "All runners stopped"
+      logger.info "All runners stopped. Exiting..."
     end
 
     # Main cycle

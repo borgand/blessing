@@ -3,8 +3,10 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 
 require 'blessing'
 require 'optparse'
+require 'daemons'
 
 opts = Blessing::Leader::DefaultOptions
+daemonize = false
 
 optparse = OptionParser.new do |o|
   o.banner = "USAGE #{File.basename $0} [options] pattern [pattern2 ...]"
@@ -21,7 +23,7 @@ optparse = OptionParser.new do |o|
 
   o.separator ""
 
-  o.on("-d", "--[no-]daemon", "Run as daemon. Default: #{opts[:daemonize]}"){|v| opts[:daemonize] = v}
+  o.on("-d", "--[no-]daemon", "Run as daemon. Default: #{daemonize}"){|v| daemonize = v}
   o.on("-l FILE", "--log FILE", "Start logging to FILE. Default: STDOUT"){|v| opts[:log] = v}
   o.on("-r SECS", "--refresh SECS", Integer, "Set the cycle length in seconds. Default: #{opts[:refresh]}"){|v| opts[:refresh] = v}
   o.on("-v", "--[no-]verbose", "Run verbosely. Default: #{opts[:verbose]}"){|v| opts[:verbose] = v}
@@ -41,11 +43,16 @@ end
 
 optparse.parse!
 
-if ARGV.size == 0
-  puts "ERROR: Missing argument - at least one configuration file required"
+patterns = ARGV
+
+if patterns.size == 0
+  STDERR.puts "ERROR: Missing argument - at least one configuration file required"
   exit 1
 end
 
-leader = Blessing::Leader.new ARGV, opts
+if daemonize
+  Daemons.daemonize(:app_name => "blessing", :dir_mode => :system)
+end
 
+leader = Blessing::Leader.new patterns, opts
 leader.start
