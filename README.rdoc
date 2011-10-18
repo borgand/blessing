@@ -25,6 +25,14 @@ After starting the servers, Blessing keeps monitoring the given list of configur
 * when a new conf is found (via globbing), starts a new instance
 * when a conf is removed, stops the corresponding instance
 
+== Signalling
+
+Blessing reacts to the following signals:
+
+* _INT_, _TERM_ - shut down Blessing group gracefully
+* _USR1_ - immediately rerun verification cycle
+* _USR2_ - try to resurrect dead Unicorns (_pending_)
+
 == Contributing to blessing
  
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet

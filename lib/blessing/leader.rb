@@ -1,4 +1,5 @@
 require 'logger'
+require 'monitor'
 
 module Blessing
 
@@ -19,7 +20,7 @@ module Blessing
     # Initialize new Blessing::Leader with file list pattern
     def initialize patterns, opts = {}
       @options = DefaultOptions.merge(opts)
-      #daemonize! if @options[:daemonize]
+      @mutex = Monitor.new
 
       initialize_logger
 
@@ -40,7 +41,8 @@ module Blessing
         at_exit
       }
       trap("USR1"){
-        # TODO: instant recycle
+        # Rerun cycle
+        run_cycle
       }
       trap("USR2"){
         # TODO: resurrect dead Unicorns!
@@ -66,14 +68,23 @@ module Blessing
         run_cycle
         sleep @options[:refresh]
       end
+    rescue => e
+      if logger && logger.respond_to?(:fatal)
+        logger.fatal "FATAL ERROR: Unexpected error: #{e}"
+        logger.fatal e.backtrace.join("\n")
+      end
+      # Reraise the exception in case somebody else catches it
+      raise e
     end
 
     # Stop running cycles
     def stop
-      @run_cycles = false
-      logger.debug "Stopping all runners..."
-      stop_runners @config_files
-      logger.info "All runners stopped. Exiting..."
+      @mutex.synchronize do
+        @run_cycles = false
+        logger.debug "Stopping all runners..."
+        stop_runners @config_files
+        logger.info "All runners stopped. Exiting..."
+      end
     end
 
     # Main cycle
@@ -81,10 +92,12 @@ module Blessing
     # - start/stop runners
     # - verify/reload runners
     def run_cycle
-      logger.debug "Next cycle"
-      refresh_file_list
-      start_stop_runners
-      reload_runners
+      @mutex.synchronize do
+        logger.debug "Next cycle"
+        refresh_file_list
+        start_stop_runners
+        reload_runners
+      end
     end
 
     # Refresh config file list and preserve old list
