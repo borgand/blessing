@@ -30,15 +30,24 @@ optparse = OptionParser.new do |o|
 
   o.separator ""
 
-  o.on_tail("-h", "--help", "Show this message") do
+  o.on("-h", "--help", "Show this message") do
     puts o
     exit
   end
 
-  o.on_tail("--version", "Show version") do
+  o.on("--version", "Show version") do
     puts Blessing.version
     exit
   end
+
+  o.separator ""
+
+  o.separator <<-EOF
+  Blessing listens for the following signals
+    INT, TERM - Exit gracefully
+    USR1      - Immediately rerun cycle
+    USR2      - Rerun cycle resurrecting dead Unicorns
+  EOF
 end
 
 optparse.parse!
