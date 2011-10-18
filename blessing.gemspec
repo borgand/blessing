@@ -27,6 +27,7 @@ Gem::Specification.new do |s|
     "Rakefile",
     "VERSION",
     "bin/blessing",
+    "blessing.gemspec",
     "lib/blessing.rb",
     "lib/blessing/leader.rb",
     "lib/blessing/runner.rb",
