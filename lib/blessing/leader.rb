@@ -46,7 +46,7 @@ module Blessing
       }
       trap("USR2"){
         # resurrect dead Unicorns!
-        reload_runners(true)
+        run_cycle(true)
       }
     end
 
@@ -92,12 +92,12 @@ module Blessing
     # - refresh file list
     # - start/stop runners
     # - verify/reload runners
-    def run_cycle
+    def run_cycle(resurrect=false)
       @mutex.synchronize do
         logger.debug "Next cycle"
         refresh_file_list
         start_stop_runners
-        reload_runners
+        reload_runners(resurrect)
       end
     end
 
