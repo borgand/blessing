@@ -31,7 +31,7 @@ Blessing reacts to the following signals:
 
 * _INT_, _TERM_ - shut down Blessing group gracefully
 * _USR1_ - immediately rerun verification cycle
-* _USR2_ - try to resurrect dead Unicorns (_pending_)
+* _USR2_ - try to resurrect dead Unicorns
 
 == Contributing to blessing
  

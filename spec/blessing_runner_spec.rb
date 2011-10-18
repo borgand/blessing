@@ -87,6 +87,24 @@ describe Blessing::Runner do
       runner.should_receive(:start).exactly(max_tries).times
 
       runner.ensure_running.should_not be_true
+      runner.dead?.should be_true
+    end
+
+    it "won't touch dead Unicorn" do
+      runner = Blessing::Runner.new @conf, :refresh => 0
+      runner.should_receive(:dead?).and_return(true)
+
+      runner.check_reload.should_not be_true
+    end
+
+    it "resurrects" do
+      runner = Blessing::Runner.new @conf, :refresh => 0
+      runner.instance_eval("@dead = true")
+      runner.should_receive(:ensure_running)
+      runner.should_receive(:running?).and_return(true)
+
+      runner.check_reload(true)
+      runner.dead?.should be_false
     end
 
     it "detects that configuration file has been modified" do

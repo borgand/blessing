@@ -87,8 +87,19 @@ module Blessing
     # Reload Unicorn if needed
     # Ensure it did start up
     # (This is the main cycle of Leader control)
-    def check_reload
+    def check_reload(resurrect=false)
       logger.debug "Verifying #{@config_file.inspect}"
+
+      # See if this Unicorn is alread dead
+      if dead?
+        logger.warn "This Unicorn is dead: PID=#{pid}, conf=#{@config_file.inspect}"
+        unless resurrect
+          return
+        else 
+          logger.warn "Resurrecting..."
+        end
+      end
+
       # If configuration has changed, reload Unicorn
       if config_modified?
         reload
@@ -97,6 +108,13 @@ module Blessing
       # In any case ensure it is running
       ensure_running
 
+      # if it was dead and is now running, we are successful
+      if dead? && running?
+        logger.warn "Successfully resurrected (necromancy +1)!"
+        @dead = false
+      else
+        logger.warn "Resurrection failed!"
+      end
     end
 
     # Reload Unicorn! master process
@@ -120,6 +138,11 @@ module Blessing
       end
     end
 
+    # is it totally dead?
+    def dead?
+      @dead
+    end
+
     # Ensure the Unicorn! process is running
     # restarting it if needed
     def ensure_running
@@ -133,8 +156,11 @@ module Blessing
         end
         if success
           logger.info "Successfully restarted"
+          # just in case it was dead before
+          @dead = false
         else
           logger.warn "Failed to restart in #{opts[:max_restarts]} tries, conf=#{@config_file.inspect}"
+          @dead = true
         end
       end
       success

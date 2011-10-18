@@ -45,7 +45,8 @@ module Blessing
         run_cycle
       }
       trap("USR2"){
-        # TODO: resurrect dead Unicorns!
+        # resurrect dead Unicorns!
+        reload_runners(true)
       }
     end
 
@@ -141,9 +142,9 @@ module Blessing
     end
 
     # Let each runner check itself if reload is needed
-    def reload_runners
+    def reload_runners(resurrect=false)
       @runners.each_value do |runner|
-        runner.check_reload
+        runner.check_reload(resurrect)
       end
     end
 
