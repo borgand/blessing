@@ -129,8 +129,10 @@ module Blessing
 
     # Verify the Unicorn! process is running
     def running?
+      p = pid
+      return false if p.nil?
       begin
-        Process.kill 0, pid
+        Process.kill 0, p
         true
       rescue Errno::ESRCH
         # just verifying; logging should be done elsewhere

@@ -55,13 +55,21 @@ describe Blessing::Runner do
       runner = Blessing::Runner.new(@conf)
 
       pid = 12345
-      runner.should_receive(:pid).and_return(pid)
-      Process.should_receive(:kill).with(0, pid).and_return(true)
+      runner.should_receive(:pid).ordered.and_return(pid)
+      Process.should_receive(:kill).ordered.with(0, pid).and_return(true)
       runner.running?.should be_true
 
       pid = 22345
-      runner.should_receive(:pid).and_return(pid)
-      Process.should_receive(:kill).with(0, pid) { raise Errno::ESRCH, "TestException" }
+      runner.should_receive(:pid).ordered.and_return(pid)
+      Process.should_receive(:kill).ordered.with(0, pid) { raise Errno::ESRCH, "TestException" }
+      runner.running?.should_not be_true
+    end
+    
+    it "assumes not running when PID is missing" do
+      runner = Blessing::Runner.new(@conf)
+      
+      runner.should_receive(:pid).and_return(nil)
+      Process.should_not_receive(:kill)
       runner.running?.should_not be_true
     end
 

@@ -2,11 +2,19 @@
 RSpec::Matchers.define :contain_a_pid_number do
   match do |actual|
     if File.exists? actual
-      pid = File.read(actual).chomp
-      pid.to_i.to_s == pid.chomp
+      @pid = File.read(actual).chomp
+      @pid.to_i.to_s == @pid.chomp
     else
       false
     end
+  end
+  
+  failure_message_for_should do |actual|
+    "File #{actual} expected to contain PID number instead of: #{@pid.inspect}"
+  end
+  
+  failure_message_for_should_not do |actual|
+    "File #{actual} expected not to contain PID number: #{@pid.inspect}"
   end
 end
 
