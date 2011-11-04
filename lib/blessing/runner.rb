@@ -92,10 +92,11 @@ module Blessing
 
       # See if this Unicorn is alread dead
       if dead?
-        logger.warn "This Unicorn is dead: PID=#{pid}, conf=#{@config_file.inspect}"
         unless resurrect
+          logger.warn "Won't touch dead unicorn: PID=#{pid}, conf=#{@config_file.inspect}"
           return
         else 
+          logger.warn "This unicorn is dead: PID=#{pid}, conf=#{@config_file.inspect}"
           logger.warn "Resurrecting..."
         end
       end
@@ -109,11 +110,13 @@ module Blessing
       ensure_running
 
       # if it was dead and is now running, we are successful
-      if dead? && running?
-        logger.warn "Successfully resurrected (necromancy +1)!"
-        @dead = false
-      else
-        logger.warn "Resurrection failed!"
+      if dead?
+        if running?
+          logger.warn "Successfully resurrected (necromancy +1)!"
+          @dead = false
+        else
+          logger.warn "Resurrection failed!"
+        end
       end
     end
 
