@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "blessing"
-  s.version = "1.0.0"
+  s.version = "1.0.1"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Laas Toom"]
-  s.date = "2011-10-18"
+  s.date = "2011-11-04"
   s.description = "A group of Unicorns is called a blessing. Blessing gem provides an easy way to manage multiple Unicorn! Rack servers."
   s.email = "laas.toom@gmail.com"
   s.executables = ["blessing"]
